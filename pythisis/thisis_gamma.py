@@ -1,6 +1,6 @@
 #
 from euclid import *
-# for euclid docs see https://github.com/ezag/pyeuclid/blob/master/euclid.rst
+# for euclid docs see: https://github.com/ezag/pyeuclid/blob/master/euclid.rst
 # for "euclid.py with updated raise error calls for python 3." see https://github.com/makemate/euclid_package
 
 
@@ -59,6 +59,7 @@ class Thisis:
         # end if kw is 'put'
 
         if kw == 'draw':
+            # fixme test for length of the command
 
             v1_name = txt_in[1]
             draw_type = txt_in[2]
@@ -72,7 +73,7 @@ class Thisis:
                            self.has_been_put[v2_name].x,
                            self.has_been_put[v2_name].y,
                            ]
-                print(ret_msg)
+                print('ret_msg:', ret_msg)
                 return ret_msg
 
             # end if draw_type == 'to'
