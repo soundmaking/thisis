@@ -24,8 +24,12 @@ to_comment_line = ['//', '/!'] + list(return_types_dict.keys())
 to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
 
+
+
+
+
 class Thisis:
-    has_been_put = {'x': Vector2(0.50, 0.50), 'z': Vector2(0.00, 0.00)}
+    has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
 
     def parse_line(self, txt_in):
         # txt_in should be a pre-processed list of strings that make up a command line
@@ -60,7 +64,7 @@ class Thisis:
                 x = float(txt_in[3])
                 y = float(txt_in[4])
                 print("x,y = ", [x, y])
-                self.has_been_put[v_name] = Vector2(x, y)
+                self.has_been_put[v_name] = Point2(x, y)
                 print('has_been_put = ', self.has_been_put)
                 return ['/>', v_name]
             # end if put_type is 'at'
