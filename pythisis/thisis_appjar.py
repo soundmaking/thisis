@@ -15,10 +15,11 @@ app = gui("test", "600x400")
 app.setFont(20)
 
 thisis = thisis_gamma.Thisis()
-pen = turtle.Pen()
-pen.shape('square')
-pen.shapesize(0.1, 0.1)
 
+trtl = turtle.Pen()
+trtl.shape('square')
+trtl.shapesize(0.1, 0.1)
+trtl.speed(10)
 
 
 def press(what):
@@ -34,16 +35,23 @@ def text_bttn(_arg):
         if li[0] == '/_':
             del li[0]
             draw_type = li.pop(0)
+            if draw_type == 'clear':
+                trtl.clear()
             if draw_type == 'linesegment':
-                p1 = eu.Point2(li[0], li[1])
-                p2 = eu.Point2(li[2], li[3])
-
-                pen.penup()
-                pen.goto(p1.x, p1.y)
-                pen.pendown()
-                pen.begin_poly()
-                pen.goto(p2.x, p2.y)
-                pen.end_poly()
+                p1x, p1y, p2x, p2y = li
+                trtl.penup()
+                trtl.goto(p1x, p1y)
+                trtl.pendown()
+                trtl.begin_poly()
+                trtl.goto(p2x, p2y)
+                trtl.end_poly()
+            if draw_type == 'circle':
+                x, y, r = li
+                trtl.penup()
+                trtl.goto(x, y - r)
+                trtl.setheading(0)
+                trtl.pendown()
+                trtl.circle(r)
 
     # print(ret_buffer)
 
@@ -70,6 +78,11 @@ draw n to e
 draw e to s
 draw s to w
 draw w to n
+
+draw z around n
+draw z around e
+draw z around s
+draw z around w
 ''')
 
 

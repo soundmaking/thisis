@@ -3,10 +3,11 @@ from euclid import *
 # for euclid docs see: https://github.com/ezag/pyeuclid/blob/master/euclid.rst
 # for "euclid.py with updated raise error calls for python 3." see https://github.com/makemate/euclid_package
 
+from math import sqrt, pow
 
-keyword_list = ['put', 'draw']  # get set macro spawn
+keyword_list = ['clear', 'put', 'draw']  # get set macro spawn
 types_of_put = ['at']  # 'on' 'where' 'group'
-types_of_draw = ['to']  # around . .o .x .[] thru spiral
+types_of_draw = ['to', 'around']  # . .o .x .[] thru spiral
 
 # parse_line() returns list as
 #     ['/!', 'a', 'return', 'message']
@@ -60,13 +61,6 @@ class TextBuffer:
         print('after cut comments:', self.buffer)
 
 
-
-class BufferParser:
-    def __init__(self):
-        pass
-
-
-
 class Thisis:
     has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
 
@@ -85,7 +79,6 @@ class Thisis:
             return_buffer.append(self.parse_line(li))
         return return_buffer
 
-
     def parse_line(self, txt_in):
         # txt_in should be a pre-processed list of strings that make up a command line
         kw = txt_in[0]
@@ -100,6 +93,9 @@ class Thisis:
             ret_msg = ['/?', kw, '<= not a keyword']
             print('ret_msg:', ret_msg)
             return ret_msg
+
+        if kw == 'clear':
+            return ['/_', 'clear']
 
         if kw == 'put':
             # put is the fundamental thisis command with syntax structure:
@@ -130,10 +126,10 @@ class Thisis:
 
         if kw == 'draw':
 
-            v1_name = txt_in[1]
+            p1_name = txt_in[1]
 
-            if v1_name not in self.has_been_put:
-                ret_msg = ['/?', v1_name, 'has not been put']
+            if p1_name not in self.has_been_put:
+                ret_msg = ['/?', p1_name, 'has not been put']
                 print('ret_msg:', ret_msg)
                 return ret_msg
 
@@ -142,20 +138,38 @@ class Thisis:
             if draw_type in types_of_draw:
                 print('draw_type = ', draw_type)
                 if draw_type == 'to':
-                    v2_name = txt_in[3]
+                    p2_name = txt_in[3]
 
-                    if v2_name not in self.has_been_put:
-                        ret_msg = ['/?', v2_name, 'has not been put']
+                    if p2_name not in self.has_been_put:
+                        ret_msg = ['/?', p2_name, 'has not been put']
                         print('ret_msg:', ret_msg)
                         return ret_msg
 
                     ret_msg = ['/_',
                                'linesegment',
-                               self.has_been_put[v1_name].x,
-                               self.has_been_put[v1_name].y,
-                               self.has_been_put[v2_name].x,
-                               self.has_been_put[v2_name].y,
+                               self.has_been_put[p1_name].x,
+                               self.has_been_put[p1_name].y,
+                               self.has_been_put[p2_name].x,
+                               self.has_been_put[p2_name].y,
                                ]
+                    print('ret_msg:', ret_msg)
+                    return ret_msg
+                # end if draw_type == 'to'
+                if draw_type == 'around':
+                    p2_name = txt_in[3]
+
+                    if p2_name not in self.has_been_put:
+                        ret_msg = ['/?', p2_name, 'has not been put']
+                        print('ret_msg:', ret_msg)
+                        return ret_msg
+
+                    x1 = self.has_been_put[p1_name].x
+                    y1 = self.has_been_put[p1_name].y
+                    x2 = self.has_been_put[p2_name].x
+                    y2 = self.has_been_put[p2_name].y
+                    radius = sqrt(pow(x1-x2, 2)+pow(y1-y2, 2))
+
+                    ret_msg = ['/_', 'circle', x2, y2, radius]
                     print('ret_msg:', ret_msg)
                     return ret_msg
                 # end if draw_type == 'to'
