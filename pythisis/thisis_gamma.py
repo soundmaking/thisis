@@ -46,16 +46,16 @@ class TextBuffer:
         block_comment_active = False
         ret_buf = []
         for li in self.buffer:
-            # li = self.buffer[i]
-            if not block_comment_active:
-                if li[0] in to_start_block_comment:
-                    block_comment_active = True
-                elif li[0] not in to_comment_line:
-                    ret_buf.append(li)
-            else:
-                # is in comment block, so look for end of block
-                if li[0] in to_end_block_comment:
-                    block_comment_active = False
+            if len(li) > 0:
+                if not block_comment_active:
+                    if li[0] in to_start_block_comment:
+                        block_comment_active = True
+                    elif li[0] not in to_comment_line:
+                        ret_buf.append(li)
+                else:
+                    # is in comment block, so look for end of block
+                    if li[0] in to_end_block_comment:
+                        block_comment_active = False
         self.buffer = ret_buf
         print('after cut comments:', self.buffer)
 
