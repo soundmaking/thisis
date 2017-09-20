@@ -16,7 +16,8 @@ return_types_dict = {
     '/>': 'successful put',
     '/<': 'successful unput',
     '/_': 'drawing data',
-    '/v': 'vector or value data'
+    '/v': 'vector or value data',
+    '/=': 'through-put for un-matched kw'
 }
 
 # commenting:
@@ -25,21 +26,75 @@ to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
 
 
+class TextBuffer:
+    def __init__(self):
+        self.buffer = []
+
+    def string_to_buffer(self, text_in, mode='set'):
+        if mode == 'set':
+            self.buffer = []
+        # if mode not 'set' then text_in appends to existing buffer
+        for l in text_in.splitlines():
+            self.buffer.append(l.split())
+
+    def line(self, num):
+        # todo error catching on num
+        return self.buffer[num]
+
+    def cut_comments(self):
+        print('before cut comments:', self.buffer)
+        block_comment_active = False
+        ret_buf = []
+        for li in self.buffer:
+            # li = self.buffer[i]
+            if not block_comment_active:
+                if li[0] in to_start_block_comment:
+                    block_comment_active = True
+                elif li[0] not in to_comment_line:
+                    ret_buf.append(li)
+            else:
+                # is in comment block, so look for end of block
+                if li[0] in to_end_block_comment:
+                    block_comment_active = False
+        self.buffer = ret_buf
+        print('after cut comments:', self.buffer)
+
+
+
+class BufferParser:
+    def __init__(self):
+        pass
 
 
 
 class Thisis:
     has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
 
+    text_buffer = TextBuffer()
+
+    def self_buffer_parse(self):
+        return self.buffer_parse(self.text_buffer.buffer)
+
+    def buffer_parse(self, input_buffer):
+        return_buffer = []
+        p = TextBuffer()
+        p.buffer = input_buffer
+        p.cut_comments()
+        for li in p.buffer:
+            # fixme
+            return_buffer.append(self.parse_line(li))
+        return return_buffer
+
+
     def parse_line(self, txt_in):
         # txt_in should be a pre-processed list of strings that make up a command line
         kw = txt_in[0]
         print('kw = ', kw)
         # test for length of the command
-        if len(txt_in) < 2:
-            ret_msg = ['/?', kw, '<= commands need more words']
-            print('ret_msg:', ret_msg)
-            return ret_msg
+        # if len(txt_in) < 2:
+        #     ret_msg = ['/?', kw, '<= commands need more words']
+        #     print('ret_msg:', ret_msg)
+        #     return ret_msg
 
         if kw not in keyword_list:
             ret_msg = ['/?', kw, '<= not a keyword']
