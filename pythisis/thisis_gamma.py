@@ -1,10 +1,10 @@
 
 from euclid3 import *
-from math import sqrt, pi, cos, sin
+from math import sqrt, pi, cos, sin, atan2, degrees
 
-keyword_list = ['clear', 'put', 'draw']  # get set macro spawn
-types_of_put = ['at']  # 'on' 'where' 'group'
-types_of_draw = ['to', 'around']  # . .o .x .[] thru spiral
+keyword_list = ['clear', 'put', 'draw']  # , 'get', 'set', 'macro', 'spawn'
+types_of_put = ['at', 'on']  # , 'where', 'group'
+types_of_draw = ['to', 'around']  # , '.', '.o', '.x', '.[]', 'thru', 'spiral'
 types_of_on = ['to', 'around']
 
 return_types_dict = {
@@ -78,14 +78,9 @@ class Thisis:
         return return_buffer
 
     def parse_line(self, txt_in):
-        # txt_in should be a pre-processed list of strings that make up a command line
+        # txt_in is expected to be a list of strings
         kw = txt_in[0]
         print('kw = ', kw)
-        # test for length of the command
-        # if len(txt_in) < 2:
-        #     ret_msg = ['/?', kw, '<= commands need more words']
-        #     print('ret_msg:', ret_msg)
-        #     return ret_msg
 
         if kw not in keyword_list:
             ret_msg = ['/='].append(txt_in)
@@ -97,17 +92,20 @@ class Thisis:
 
         if kw == 'put':
             # put is the fundamental thisis command with syntax structure:
-            #     put <point name> <put type [at|on|where|group]> <(additional info to specify where)>
-            # successful put commands result in new or altered items in the has_been_put dict
+            #     put
+            #     <point name>
+            #     <put type [at|on|where|group]>
+            #     <(additional info to specify where)>
+            # successful put commands make changes to the has_been_put dict
             if len(txt_in) < 5:
-                ret_msg = ['/?', 'put commands need more words']
+                ret_msg = ['/?', 'too short:', '/='].append(txt_in)
                 print('ret_msg:', ret_msg)
                 return ret_msg
 
             p_name = txt_in[1]
             put_type = txt_in[2]
 
-            print('put_type = ', put_type)
+            # print('put_type = ', put_type)
 
             if put_type == 'at':
                 x = float(txt_in[3])
@@ -118,34 +116,67 @@ class Thisis:
                 return ['/>', p_name, str(x), str(y)]
             # end if put_type is 'at'
 
+
+
             if put_type == 'on':
-                # // put C on A $4 B at <value> <type>
+                # // put C on A $4 B at <value> <unit_type>
                 #               ^- $4 specifies the relationship
                 #                 between points A and B ($3 and $5)
                 #                 which have already been put
+                # // put $1 on $3 around $5 at $7 deg
+                #                                 ^- 'deg' or 'rad'
+                # // put $1 on $3 to $5 at $7 %
+                #                             ^\
+                #            in version _b the '%-' unit_type was added
+                #            to fix the 'reverse slope' bug in version _a.
+                #
+                #     for _g a new method is implemented.
+
+                if len(txt_in) < 8:
+                    # Abort if the message isn't long enough
+                    ret_msg = ['/?', 'not enough words', '/='].append(txt_in)
+                    print('ret_msg:', ret_msg)
+                    return ret_msg
+
                 on_type = txt_in[4]
                 if on_type not in types_of_on:
                     return ['/?', 'on', on_type, 'unknown']
+                p3 = self.has_been_put[txt_in[3]]
+                p5 = self.has_been_put[txt_in[5]]
+                distance = howfar(p3, p5)
+                f7 = float(txt_in[7])  # f7 is the <value>
+
+                if len(txt_in) > 8:
+                    unit_type = txt_in[8]
+                else:
+                    # Set default unit type:
+                    unit_type = 'deg' if on_type == 'around' else '%'
+
                 if on_type == 'around':
-                    # put $1 on $3 around $5 at $7 deg
-                    p_name = txt_in[1]
-                    if len(txt_in) < 8:
-                        ret_msg = ['/?', 'something missing?', '/='].append(txt_in)
-                        print('ret_msg:', ret_msg)
-                        return ret_msg
-                    p3 = self.has_been_put[txt_in[3]]
-                    p5 = self.has_been_put[txt_in[5]]
-                    theta = float(txt_in[7])
-
-                    if len(txt_in) > 8:
-                        theta_unit = txt_in[8]
-                    else:
-                        theta_unit = 'deg'
-
-                    radius = howfar(p3, p5)
-                    vector = poltocar(radius, theta, theta_unit)
-                    p = vector + p5
+                    p = p5 + poltocar(distance, f7, unit_type)
                     return self.parse_line(['put', p_name, 'at', p.x, p.y])
+                # end if on_type == 'around'
+
+                if on_type == 'to':
+                    v = p5-p3
+                    r, theta = cartopol(v.x, v.y)  # theta in radians this time
+                    if unit_type == '%':
+                        n = float(f7) / 100.
+                    else:
+                        n = 0.5  # fixme handle error: unit_type not '%'
+                    d = r * n
+                    temp_x, temp_y = p3 + Point2(d, 0)
+                    temp_msg = ['put', '_temp_', 'at', temp_x, temp_y]
+                    self.parse_line(temp_msg)
+
+                    temp_msg = ['put', p_name,
+                                'on', '_temp_', 'around', txt_in[3],
+                                'at', theta, 'rad']
+                    ret_msg = self.parse_line(temp_msg)
+                    # self.parse_line(['unput', '_temp_'])  # fixme implement unput
+                    return ret_msg
+
+                # end if on_type == 'to'
             # end if put_type == 'on':
         # end if kw == 'put'
 
@@ -223,6 +254,17 @@ def poltocar(r, theta, *args):
     x = cos(theta) * r
     y = sin(theta) * r
     return Vector2(x, y)
+
+
+def cartopol(x, y, *args):
+    # cartesian to polar:
+    #   input  = x and y
+    #   output = r and theta in radians (or degrees if specified in call)
+    r = howfar(Point2(x, y))
+    theta = atan2(y, x)
+    if 'deg' in args:
+        theta = degrees(theta)
+    return [r, theta]
 
 
 def howfar(p1=Point2(), p2=Point2()):
