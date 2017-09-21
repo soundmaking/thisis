@@ -1,13 +1,14 @@
-#
-from euclid import *
-# for euclid docs see: https://github.com/ezag/pyeuclid/blob/master/euclid.rst
-# for "euclid.py with updated raise error calls for python 3." see https://github.com/makemate/euclid_package
 
-from math import sqrt, pow
+from euclid3 import * 
+
+from math import sqrt, pow, pi, cos, sin
 
 keyword_list = ['clear', 'put', 'draw']  # get set macro spawn
 types_of_put = ['at']  # 'on' 'where' 'group'
 types_of_draw = ['to', 'around']  # . .o .x .[] thru spiral
+types_of_on = ['to', 'around']
+
+
 
 # parse_line() returns list as
 #     ['/!', 'a', 'return', 'message']
@@ -25,6 +26,7 @@ return_types_dict = {
 to_comment_line = ['//', '/!'] + list(return_types_dict.keys())
 to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
+
 
 
 class TextBuffer:
@@ -90,7 +92,7 @@ class Thisis:
         #     return ret_msg
 
         if kw not in keyword_list:
-            ret_msg = ['/?', kw, '<= not a keyword']
+            ret_msg = ['/='].append(txt_in)
             print('ret_msg:', ret_msg)
             return ret_msg
 
@@ -106,7 +108,7 @@ class Thisis:
                 print('ret_msg:', ret_msg)
                 return ret_msg
 
-            v_name = txt_in[1]
+            p_name = txt_in[1]
             put_type = txt_in[2]
 
             print('put_type = ', put_type)
@@ -115,13 +117,40 @@ class Thisis:
                 x = float(txt_in[3])
                 y = float(txt_in[4])
                 print("x,y = ", [x, y])
-                self.has_been_put[v_name] = Point2(x, y)
+                self.has_been_put[p_name] = Point2(x, y)
                 print('has_been_put = ', self.has_been_put)
-                return ['/>', v_name]
+                return ['/>', p_name, str(x), str(y)]
             # end if put_type is 'at'
-            elif put_type == 'on':
-                pass
 
+            if put_type == 'on':
+                # // put C on A $4 B at <value> <type>
+                #               ^- $4 specifies the relationship
+                #                 between points A and B ($3 and $5)
+                #                 which have already been put
+                on_type = txt_in[4]
+                if on_type not in types_of_on:
+                    return ['/?', 'on', on_type, 'unknown']
+                if on_type == 'around':
+                    # put $1 on $3 around $5 at $7 deg
+                    p_name = txt_in[1]
+                    if len(txt_in) < 8:
+                        ret_msg = ['/?', 'something missing?', '/='].append(txt_in)
+                        print('ret_msg:', ret_msg)
+                        return ret_msg
+                    p3 = self.has_been_put[txt_in[3]]
+                    p5 = self.has_been_put[txt_in[5]]
+                    theta = float(txt_in[7])
+
+                    if len(txt_in) > 8:
+                        theta_unit = txt_in[8]
+                    else:
+                        theta_unit = 'deg'
+
+                    radius = howfar(p3, p5)
+                    vector = poltocar(radius, theta, theta_unit)
+                    p = vector + p5
+                    return self.parse_line(['put', p_name, 'at', p.x, p.y])
+            # end if put_type == 'on':
         # end if kw == 'put'
 
         if kw == 'draw':
@@ -163,13 +192,11 @@ class Thisis:
                         print('ret_msg:', ret_msg)
                         return ret_msg
 
-                    x1 = self.has_been_put[p1_name].x
-                    y1 = self.has_been_put[p1_name].y
-                    x2 = self.has_been_put[p2_name].x
-                    y2 = self.has_been_put[p2_name].y
-                    radius = sqrt(pow(x1-x2, 2)+pow(y1-y2, 2))
+                    p1 = self.has_been_put[p1_name]
+                    p2 = self.has_been_put[p2_name]
+                    radius = howfar(p1, p2)
 
-                    ret_msg = ['/_', 'circle', x2, y2, radius]
+                    ret_msg = ['/_', 'circle', p2.x, p2.y, radius]
                     print('ret_msg:', ret_msg)
                     return ret_msg
                 # end if draw_type == 'to'
@@ -181,6 +208,31 @@ class Thisis:
 
         # end if kw == 'draw'
         else:
-            print('? check keyword_list')  # shouldn't reach this
+            # function shouldn't reach this if keyword_list is correct
+            print('? check keyword_list')
             return ['/?', '!']
     # end def parse_line(self, line)
+
+
+
+def degtorad(deg):
+    return pi*(deg/180)
+
+def poltocar(r, theta, *args):
+    # polar to cartesian:
+    #   input  = radius and radians (or degrees if specified in call)
+    #   output = x y vector
+    if 'deg' in args:
+        theta = degtorad(theta)
+    x = cos(theta) * r
+    y = sin(theta) * r
+    return Vector2(x, y)
+
+
+def howfar(p1=Point2(), p2=Point2()):
+    a = p1.x - p2.x
+    b = p1.y - p2.y
+    h = sqrt(a**2 + b**2)
+    return h
+
+
