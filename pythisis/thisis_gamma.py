@@ -1,32 +1,28 @@
 
-from euclid3 import * 
-
-from math import sqrt, pow, pi, cos, sin
+from euclid3 import *
+from math import sqrt, pi, cos, sin
 
 keyword_list = ['clear', 'put', 'draw']  # get set macro spawn
 types_of_put = ['at']  # 'on' 'where' 'group'
 types_of_draw = ['to', 'around']  # . .o .x .[] thru spiral
 types_of_on = ['to', 'around']
 
-
-
-# parse_line() returns list as
-#     ['/!', 'a', 'return', 'message']
-# with one of these types:
 return_types_dict = {
+    # parse_line() returns list such as ['/!', 'a', 'return', 'message']
+    # beginning with one of these token types:
     '/?': 'error',
     '/>': 'successful put',
     '/<': 'successful unput',
     '/_': 'drawing data',
     '/v': 'vector or value data',
     '/=': 'through-put for un-matched kw'
+    #  any of these will also act to comment out a single line if parsed
 }
 
 # commenting:
 to_comment_line = ['//', '/!'] + list(return_types_dict.keys())
 to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
-
 
 
 class TextBuffer:
@@ -214,9 +210,9 @@ class Thisis:
     # end def parse_line(self, line)
 
 
-
 def degtorad(deg):
     return pi*(deg/180)
+
 
 def poltocar(r, theta, *args):
     # polar to cartesian:
@@ -234,5 +230,3 @@ def howfar(p1=Point2(), p2=Point2()):
     b = p1.y - p2.y
     h = sqrt(a**2 + b**2)
     return h
-
-

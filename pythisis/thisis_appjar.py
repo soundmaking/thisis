@@ -2,13 +2,11 @@
 # experiment to test out appjar
 
 from appJar import gui
-import thisis_gamma
+import pythisis.thisis_gamma as thisis_gamma
 import turtle
-import euclid as eu
-from math import pi, degrees, sqrt
+
 
 turtle_shapes = ['classic', 'arrow', 'turtle', 'circle', 'square', 'triangle']
-
 
 
 app = gui("test", "600x400")
@@ -24,8 +22,6 @@ trtl.speed(10)
 
 def press(what):
     print(what)
-
-
 
 
 def text_bttn(_arg):
@@ -56,8 +52,7 @@ def text_bttn(_arg):
     # print(ret_buffer)
 
 
-
-def update_settings(*args):
+def update_settings():
     pass
 
 
