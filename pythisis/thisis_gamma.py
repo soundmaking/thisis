@@ -1,5 +1,5 @@
 
-from euclid3 import *
+from euclid import *
 from math import sqrt, pi, cos, sin, atan2, degrees
 
 keyword_list = ['clear', 'put', 'draw']  # , 'get', 'set', 'macro', 'spawn'

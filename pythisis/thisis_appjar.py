@@ -2,7 +2,7 @@
 # experiment to test out appjar
 
 from appJar import gui
-import pythisis.thisis_gamma as thisis_gamma
+import thisis_gamma
 import turtle
 
 
