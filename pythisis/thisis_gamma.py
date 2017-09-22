@@ -1,5 +1,5 @@
 
-from euclid3 import *
+from euclid3 import Point2, Vector2
 from math import sqrt, pi, cos, sin, atan2, degrees
 
 # the 'to do' lists below are based on documentation of syntax in thisis_beta
