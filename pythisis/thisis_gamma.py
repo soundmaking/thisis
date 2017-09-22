@@ -6,7 +6,7 @@ from math import sqrt, pi, cos, sin, atan2, degrees
 
 keyword_list = ['clear', 'put', 'unput', 'draw']
 # todo , 'delay', 'set', 'get', 'macro', '{', '}', '{}', 'spawn',
-types_of_put = ['at', 'on']  # todo , 'where', 'group'
+types_of_put = ['at', 'on', 'where']  # todo , 'group'
 types_of_on = ['to', 'around']
 types_of_draw = ['to', 'around']
 # todo , '.', '.o', '.x', '.[]', 'thru', 'spiral'
@@ -160,7 +160,11 @@ class Thisis:
             p_name = txt_in[1]
             put_type = txt_in[2]
 
-            # print('put_type = ', put_type)
+            if put_type not in types_of_put:
+                # fixme better to use try here instead fo if?
+                ret_msg = ['/?', 'cannot put with:', put_type]
+                print('ret_msg:', ret_msg)
+                return ret_msg
 
             if put_type == 'at':
                 x = float(txt_in[3])
@@ -170,8 +174,6 @@ class Thisis:
                 print('has_been_put = ', self.has_been_put)
                 return ['/>', p_name, str(x), str(y)]
             # end if put_type is 'at'
-
-
 
             if put_type == 'on':
                 # // put C on A $4 B at <value> <unit_type>
@@ -234,6 +236,18 @@ class Thisis:
 
                 # end if on_type == 'to'
             # end if put_type == 'on':
+
+            if put_type == 'where':
+                # // put $1 where $3 is
+                p3_name = txt_in[3]
+                if p3_name in self.has_been_put:
+                    self.has_been_put[p_name] = self.has_been_put[p3_name]
+                    x, y = self.has_been_put[p3_name].xy
+                    ret_msg = ['/>', p_name, x, y]
+                else:
+                    ret_msg = ['/?', p3_name, 'has not been put']
+                return ret_msg
+            # end if put_type == 'where'
         # end if kw == 'put'
 
         if kw == 'unput':
