@@ -6,7 +6,7 @@ from math import sqrt, pi, cos, sin, atan2, degrees
 
 keyword_list = ['clear', 'put', 'unput', 'draw']
 # todo , 'delay', 'set', 'get', 'macro', '{', '}', '{}', 'spawn',
-types_of_put = ['at', 'on', 'where']  # todo , 'group'
+types_of_put = ['at', 'on', 'where', 'group']
 types_of_on = ['to', 'around']
 types_of_draw = ['to', 'around']
 # todo , '.', '.o', '.x', '.[]', 'thru', 'spiral'
@@ -248,6 +248,62 @@ class Thisis:
                     ret_msg = ['/?', p3_name, 'has not been put']
                 return ret_msg
             # end if put_type == 'where'
+
+            if put_type == 'group':
+                # // put p_name group $i3 on $p5 [around||to] $p7
+                if not txt_in[4] == 'on':
+                    ret_msg = ['/?',
+                               "in group put, expecting 'on', got:",
+                               txt_in[4]]
+                    return ret_msg
+
+                if len(txt_in) < 8:
+                    ret_msg = ['/?', 'too short:', '/='].append(txt_in)
+                    print('ret_msg:', ret_msg)
+                    return ret_msg
+
+                on_type = txt_in[6]
+
+                if on_type not in types_of_on:
+                    return ['/?', 'on type', on_type, 'unknown']
+
+                group_size = int(txt_in[3])
+                p5 = txt_in[5]
+                p7 = txt_in[7]
+                put = ['put', '[1]', 'on',
+                       p5, on_type, p7,
+                       'at', 7, '[8]'
+                       ]  # [1] is new_name, [7] is value, [8] is unit_type
+
+                put_ret_list = []
+                put_ret_string = ''
+                ret_msg = ['/>', 'group:']
+
+                for n in range(group_size):
+                    print(n, '/', group_size)
+                    put[1] = p_name + str(n)
+                    print(put[1])
+                    if on_type == 'around':
+                        put[7] = (n/group_size) * 360
+                        put[8] = 'deg'
+                    elif on_type == 'to':
+                        put[7] = (n/group_size) * 100
+                        put[8] = '%'
+                    else:
+                        put_ret_list.append(
+                            ['/?', 'wrong on_type:', '/='].append(txt_in)
+                        )
+                    put_ret = self.parse_line(put)
+                    print('put_ret', put_ret)
+                    put_ret_list.append(put_ret)
+                # end for n in range(group_size)
+
+                for msg in put_ret_list:
+                    put_ret_string += ' ' + ' '.join(msg)
+
+                ret_msg.append(put_ret_string)
+                return ret_msg
+            # end if put_type == 'group'
         # end if kw == 'put'
 
         if kw == 'unput':
