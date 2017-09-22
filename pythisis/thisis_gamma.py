@@ -2,10 +2,31 @@
 from euclid3 import *
 from math import sqrt, pi, cos, sin, atan2, degrees
 
-keyword_list = ['clear', 'put', 'draw']  # , 'get', 'set', 'macro', 'spawn'
-types_of_put = ['at', 'on']  # , 'where', 'group'
-types_of_draw = ['to', 'around']  # , '.', '.o', '.x', '.[]', 'thru', 'spiral'
+# the 'to do' lists below are based on documentation of syntax in thisis_beta
+
+keyword_list = ['clear', 'put', 'unput', 'draw']
+# todo , 'delay', 'set', 'get', 'macro', '{', '}', '{}', 'spawn',
+types_of_put = ['at', 'on']  # todo , 'where', 'group'
 types_of_on = ['to', 'around']
+types_of_draw = ['to', 'around']
+# todo , '.', '.o', '.x', '.[]', 'thru', 'spiral'
+# types_of_clear = []  # todo 'all', 'put', 'macros', 'namedrgba',
+# types_of_set = []
+# todo 'delaytime', 'namedrgba', 'dot', 'pen', 'penloc', 'sleep', '_'
+# types_of_pen_set = []  # todo 'size', 'rgba', 'namedrgba'
+# types_of_penloc_set = []  # todo 'to', 'move'
+# types_of_get = []  # todo 'rgba', 'howfar', 'whereis', 'howmany'
+# types_of_spiral = []  # todo 'log', 'Archimedes', 'A'
+# types_of_macro = []  # todo 'start', 'end', 'run'
+
+# deprecated syntax:
+#    keywords that were in _beta, but are dropped:...
+#         lcd, thisis, (relpx,rel,relative),
+#    ...or changed in _gamma:
+#        clearall, colour, dotsize, pensize, (sleep,_),
+
+# idea - maybe collapse all the types_of_... lists into a one nested
+#         structure which could then be parsed out to document the syntax
 
 return_types_dict = {
     # parse_line() returns list such as ['/!', 'a', 'return', 'message']
@@ -23,6 +44,40 @@ return_types_dict = {
 to_comment_line = ['//', '/!'] + list(return_types_dict.keys())
 to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
+
+
+
+def degtorad(deg):
+    return pi*(deg/180)
+
+
+def poltocar(r, theta, *args):
+    # polar to cartesian:
+    #   input  = radius and radians (or degrees if specified in call)
+    #   output = x y vector
+    if 'deg' in args:
+        theta = degtorad(theta)
+    x = cos(theta) * r
+    y = sin(theta) * r
+    return Vector2(x, y)
+
+
+def cartopol(x, y, *args):
+    # cartesian to polar:
+    #   input  = x and y
+    #   output = r and theta in radians (or degrees if specified in call)
+    r = howfar(Point2(x, y))
+    theta = atan2(y, x)
+    if 'deg' in args:
+        theta = degrees(theta)
+    return [r, theta]
+
+
+def howfar(p1=Point2(), p2=Point2()):
+    a = p1.x - p2.x
+    b = p1.y - p2.y
+    h = sqrt(a**2 + b**2)
+    return h
 
 
 class TextBuffer:
@@ -173,16 +228,34 @@ class Thisis:
                                 'on', '_temp_', 'around', txt_in[3],
                                 'at', theta, 'rad']
                     ret_msg = self.parse_line(temp_msg)
-                    # self.parse_line(['unput', '_temp_'])  # fixme implement unput
+                    # self.parse_line(['unput', '_temp_'])
+                    #  fixme test with unput
                     return ret_msg
 
                 # end if on_type == 'to'
             # end if put_type == 'on':
         # end if kw == 'put'
 
-        if kw == 'draw':
+        if kw == 'unput':
+            try:
+                p_name = txt_in[1]
+            except IndexError:
+                print('nothing after', kw)
+                return ['/?', 'nothing after', kw]
+            if p_name in self.has_been_put:
+                del self.has_been_put[p_name]
+                ret_msg = ['/<', p_name]
+            else:
+                ret_msg = ['/?', p_name, 'has not been put']
+            return ret_msg
+        # end if kw == 'unput'
 
-            p1_name = txt_in[1]
+        if kw == 'draw':
+            try:
+                p1_name = txt_in[1]
+            except IndexError:
+                print('nothing after', kw)
+                return ['/?', 'nothing after', kw]
 
             if p1_name not in self.has_been_put:
                 ret_msg = ['/?', p1_name, 'has not been put']
@@ -241,34 +314,16 @@ class Thisis:
     # end def parse_line(self, line)
 
 
-def degtorad(deg):
-    return pi*(deg/180)
-
-
-def poltocar(r, theta, *args):
-    # polar to cartesian:
-    #   input  = radius and radians (or degrees if specified in call)
-    #   output = x y vector
-    if 'deg' in args:
-        theta = degtorad(theta)
-    x = cos(theta) * r
-    y = sin(theta) * r
-    return Vector2(x, y)
-
-
-def cartopol(x, y, *args):
-    # cartesian to polar:
-    #   input  = x and y
-    #   output = r and theta in radians (or degrees if specified in call)
-    r = howfar(Point2(x, y))
-    theta = atan2(y, x)
-    if 'deg' in args:
-        theta = degrees(theta)
-    return [r, theta]
-
-
-def howfar(p1=Point2(), p2=Point2()):
-    a = p1.x - p2.x
-    b = p1.y - p2.y
-    h = sqrt(a**2 + b**2)
-    return h
+if __name__ == '__main__':
+    print('/!\n/! thisis \n/! _gamma \n/!')
+    thisis = Thisis()
+    done = False
+    while not done:
+        text = input('/!>>> ')
+        if text == 'exit':
+            done = True
+            break
+        thisis.text_buffer.string_to_buffer(text)
+        ret_buffer = thisis.self_buffer_parse()
+        for li in ret_buffer:
+            print('/!\n/!<<<', li, '\n/!')
