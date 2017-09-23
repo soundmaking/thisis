@@ -54,13 +54,11 @@ def text_bttn(_arg):
                 trtl.setheading(0)
                 trtl.pendown()
                 trtl.circle(r)
-                
-        if '/>' == msg_type:
-            del msg[0]
-            info = '/> '
-            for n in range(0, len(msg), 3):
-                info += str(msg[n])+' '
 
+        elif '/>' == msg_type:
+            info = msg.pop(0)
+            for n in range(0, len(msg), 3):
+                info += ' '+str(msg[n])
             print(info)
             
         else:
