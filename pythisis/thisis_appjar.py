@@ -27,14 +27,14 @@ def press(what):
 def text_bttn(_arg):
     thisis.text_buffer.string_to_buffer(app.getTextArea('textbox'))
     ret_buffer = thisis.self_buffer_parse()
-    for li in ret_buffer:
-        if li[0] == '/_':
-            del li[0]
-            draw_type = li.pop(0)
+    for msg in ret_buffer:
+        if msg[0] == '/_':
+            del msg[0]
+            draw_type = msg.pop(0)
             if draw_type == 'clear':
                 trtl.clear()
             if draw_type == 'linesegment':
-                p1x, p1y, p2x, p2y = li
+                p1x, p1y, p2x, p2y = msg
                 trtl.penup()
                 trtl.goto(p1x, p1y)
                 trtl.pendown()
@@ -42,12 +42,15 @@ def text_bttn(_arg):
                 trtl.goto(p2x, p2y)
                 trtl.end_poly()
             if draw_type == 'circle':
-                x, y, r = li
+                x, y, r = msg
                 trtl.penup()
                 trtl.goto(x, y - r)
                 trtl.setheading(0)
                 trtl.pendown()
                 trtl.circle(r)
+        else:
+            print(' '.join(msg))
+        
 
     # print(ret_buffer)
 

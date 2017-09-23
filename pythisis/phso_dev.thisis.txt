@@ -1,0 +1,15 @@
+//
+// clear 
+/*
+put x at 250 0
+draw x around z
+put p group 5 on x around z
+draw p0 to p4
+put h group 6 on x around z
+draw h0 to h5
+put s group 7 on x around z
+draw s0 to s6
+put o group 8 on x around z
+draw o0 to o7
+*/
+
