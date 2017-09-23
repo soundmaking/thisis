@@ -1,0 +1,52 @@
+//
+// clear 
+
+put x at 250 0
+draw x around z
+put p group 5 on x around z
+draw p0 to p4
+put h group 6 on x around z
+draw h0 to h5
+put s group 7 on x around z
+draw s0 to s6
+put o group 8 on x around z
+draw o0 to o7
+*/
+
+// *
+ clear 
+
+// draw x around z
+
+draw x to p0
+draw x to p1
+draw x to p2
+draw x to p3
+draw x to p4
+
+draw x to h0
+draw x to h1
+draw x to h2
+draw x to h3
+draw x to h4
+draw x to h5
+
+draw x to s0
+draw x to s1
+draw x to s2
+draw x to s3
+draw x to s4
+draw x to s5
+draw x to s6
+
+draw x to o0
+draw x to o1
+draw x to o2
+draw x to o3
+draw x to o4
+draw x to o5
+draw x to o6
+draw x to o7
+
+
+// */
