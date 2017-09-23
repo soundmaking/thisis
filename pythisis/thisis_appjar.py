@@ -27,12 +27,17 @@ def press(what):
 def text_bttn(_arg):
     thisis.text_buffer.string_to_buffer(app.getTextArea('textbox'))
     ret_buffer = thisis.self_buffer_parse()
+
     for msg in ret_buffer:
-        if msg[0] == '/_':
+        msg_type = msg[0]
+        
+        if '/_' == msg_type:
             del msg[0]
             draw_type = msg.pop(0)
+            
             if draw_type == 'clear':
                 trtl.clear()
+                
             if draw_type == 'linesegment':
                 p1x, p1y, p2x, p2y = msg
                 trtl.penup()
@@ -41,6 +46,7 @@ def text_bttn(_arg):
                 trtl.begin_poly()
                 trtl.goto(p2x, p2y)
                 trtl.end_poly()
+                
             if draw_type == 'circle':
                 x, y, r = msg
                 trtl.penup()
@@ -48,11 +54,19 @@ def text_bttn(_arg):
                 trtl.setheading(0)
                 trtl.pendown()
                 trtl.circle(r)
-        else:
-            print(' '.join(msg))
-        
+                
+        if '/>' == msg_type:
+            del msg[0]
+            info = '/> '
+            for n in range(0, len(msg), 3):
+                info += str(msg[n])+' '
 
-    # print(ret_buffer)
+            print(info)
+            
+        else:
+            print('other:', msg)
+        
+# end def text_bttn(_arg)
 
 
 def update_settings():
@@ -66,22 +80,22 @@ app.addButton("txt", text_bttn)
 # app.addLabelOptionBox('turtle shape', turtle_shapes)
 # app.addButton('update', update_settings)
 
-app.setTextArea('textbox', '''/!
-put n at 0 111
-put e at 111 0
-put s at 0 -111
-put w at -111 0
-
-draw n to e
-draw e to s
-draw s to w
-draw w to n
-
-draw z around n
-draw z around e
-draw z around s
-draw z around w
-''')
+##app.setTextArea('textbox', '''/!
+##put n at 0 111
+##put e at 111 0
+##put s at 0 -111
+##put w at -111 0
+##
+##draw n to e
+##draw e to s
+##draw s to w
+##draw w to n
+##
+##draw z around n
+##draw z around e
+##draw z around s
+##draw z around w
+##''')
 
 
 app.go()
