@@ -1,6 +1,6 @@
 /*
   drawing with thisis_gamma
-    'towards in celebration of slippers'
+    'on slippers'
     by sdf 2017-09-24
 */
 
@@ -30,27 +30,35 @@ put RaacR on aacL to aacR at 175 %
 put LbbcL on bbcR to bbcL at 175 %
 put RbbcR on bbcL to bbcR at 175 %
 
+put c group 24 on x around z
 
 //
 
 
 draw aL to acL
-draw bL to bcL
-draw aR to acR
-draw bR to bcR
-
-
-draw aacL to LaacL
-draw bbcL to LbbcL
-draw aacR to RaacR
-draw bbcR to RbbcR
-
-draw acR to aacR
 draw acL to aacL
+draw aacL to LaacL
 
-draw bcR to bbcR
+draw bL to bcL
 draw bcL to bbcL
+draw bbcL to LbbcL
+
+draw aR to acR
+draw acR to aacR
+draw aacR to RaacR
+
+draw bR to bcR
+draw bcR to bbcR
+draw bbcR to RbbcR
 
 draw L to R
 
-draw x around z
+// draw x around z
+
+draw aR thru c2 c3 c4 c5 c6 c7 c8 c9 c10 aL
+draw bL thru c14 c15 c16 c17 c18 c19 c20 c21 c22 bR
+
+// draw x around z
+
+draw z to c10
+draw aR thru c2 c2 c4 c5 c6 c7 c8 c9 c10 aL

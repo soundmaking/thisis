@@ -389,8 +389,9 @@ class Thisis:
                     
                     if pn_name not in self.has_been_put:
                         return ['/?', '{} has not been put'.format(pn_name)]
-
-                    ret_msg.append(self.has_been_put[pn_name].xy)
+                    
+                    ret_msg.append(self.has_been_put[pn_name].x)
+                    ret_msg.append(self.has_been_put[pn_name].y)
                     
                 return ret_msg
                 

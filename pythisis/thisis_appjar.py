@@ -47,6 +47,18 @@ def text_bttn(_arg):
                 trtl.goto(p2x, p2y)
                 trtl.end_poly()
                 
+            if 'poly' == draw_type:
+                p1x, p1y, p2x, p2y = msg[0:4]
+                trtl.penup()
+                trtl.goto(p1x, p1y)
+                trtl.pendown()
+                trtl.begin_poly()
+                trtl.goto(p2x, p2y)
+                for n in range(4, len(msg), 2):
+                    nx, ny = msg[n:n+2]
+                    trtl.goto(nx, ny)
+                trtl.end_poly()
+                
             if draw_type == 'circle':
                 x, y, r = msg
                 trtl.penup()
@@ -78,22 +90,67 @@ app.addButton("txt", text_bttn)
 # app.addLabelOptionBox('turtle shape', turtle_shapes)
 # app.addButton('update', update_settings)
 
-##app.setTextArea('textbox', '''/!
-##put n at 0 111
-##put e at 111 0
-##put s at 0 -111
-##put w at -111 0
-##
-##draw n to e
-##draw e to s
-##draw s to w
-##draw w to n
-##
-##draw z around n
-##draw z around e
-##draw z around s
-##draw z around w
-##''')
+app.setTextArea('textbox', '''/!
+/*
+  drawing with thisis_gamma
+    'on slippers'
+    by sdf 2017-09-24
+*/
+
+clear
+put x at 123 123 
+
+put L on x around z at -180 deg
+put R on x around z at 0 deg
+
+put aR on x around z at 15 deg
+put bR on x around z at -15 deg
+put aL on x around z at 165 deg
+put bL on x around z at -165 deg
+
+put acL on aL to aR at 40 %
+put acR on aR to aL at 40 %
+put bcR on bR to bL at 40 %
+put bcL on bL to bR at 40 %
+
+put bbcR on acR to bcR at 150 %
+put bbcL on acL to bcL at 150 %
+put aacR on bcR to acR at 150 %
+put aacL on bcL to acL at 150 %
+
+put LaacL on aacR to aacL at 175 %
+put RaacR on aacL to aacR at 175 %
+put LbbcL on bbcR to bbcL at 175 %
+put RbbcR on bbcL to bbcR at 175 %
+
+put c group 24 on x around z
+
+//
+
+
+draw aL to acL
+draw acL to aacL
+draw aacL to LaacL
+
+draw bL to bcL
+draw bcL to bbcL
+draw bbcL to LbbcL
+
+draw aR to acR
+draw acR to aacR
+draw aacR to RaacR
+
+draw bR to bcR
+draw bcR to bbcR
+draw bbcR to RbbcR
+
+draw L to R
+
+// draw x around z
+
+draw aR thru c2 c3 c4 c5 c6 c7 c8 c9 c10 aL
+draw bL thru c14 c15 c16 c17 c18 c19 c20 c21 c22 bR
+''')
 
 
 app.go()
