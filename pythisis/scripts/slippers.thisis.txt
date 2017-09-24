@@ -1,0 +1,27 @@
+/*
+  drawing with thisis_gamma
+    'towards in celebration of slippers'
+    by sdf 2017-09-24
+*/
+
+clear
+put x at 123 123 
+
+put L on x around z at -180 deg
+put R on x around z at 0 deg
+
+put cL on L to R at 36 %
+
+/! thisis drawing theta+ ccw
+
+put bcR on cL around z at -45 deg
+put acR on cL around z at 45 deg
+put bcL on cL around z at -135 deg
+put acL on cL around z at 135 deg
+
+draw bcR to acR
+draw bcL to acL
+
+draw L to R
+draw cL around z
+draw x around z
