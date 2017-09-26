@@ -11,7 +11,7 @@ types_of_put = ['at', 'on', 'where', 'group']
 types_of_put_on = ['to', 'around']
 
 types_of_draw_dot = ['.', '.o', '.x', '.[]']
-types_of_draw_line = ['to', 'around']  # todo ,'thru', 'spiral'
+types_of_draw_line = ['to', 'around', 'thru']  # todo , 'spiral'
 types_of_draw = types_of_draw_dot + types_of_draw_line
 
 # types_of_clear = []  # todo 'all', 'put', 'macros', 'namedrgba',
@@ -373,6 +373,28 @@ class Thisis:
                 ret_msg = ['/_', 'circle', p2.x, p2.y, radius]
                 return ret_msg
             # end if draw_type == 'to'
+
+            #
+
+            if 'thru' == draw_type:
+                # // draw p1 thru p2 p3 ... pn
+                ret_msg = ['/_', 'poly', p1.x, p1.y, p2.x, p2.y]
+                num_extra_points = len(txt_in)-4
+
+                if num_extra_points < 1:
+                    return ret_msg
+
+                for n in range(num_extra_points):
+                    pn_name = txt_in[n+4]
+                    
+                    if pn_name not in self.has_been_put:
+                        return ['/?', '{} has not been put'.format(pn_name)]
+                    
+                    ret_msg.append(self.has_been_put[pn_name].x)
+                    ret_msg.append(self.has_been_put[pn_name].y)
+                    
+                return ret_msg
+                
 
         # end if kw == 'draw'
         else:

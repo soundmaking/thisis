@@ -1,0 +1,64 @@
+/*
+  drawing with thisis_gamma
+    'on slippers'
+    by sdf 2017-09-24
+*/
+
+clear
+put x at 123 123 
+
+put L on x around z at -180 deg
+put R on x around z at 0 deg
+
+put aR on x around z at 15 deg
+put bR on x around z at -15 deg
+put aL on x around z at 165 deg
+put bL on x around z at -165 deg
+
+put acL on aL to aR at 40 %
+put acR on aR to aL at 40 %
+put bcR on bR to bL at 40 %
+put bcL on bL to bR at 40 %
+
+put bbcR on acR to bcR at 150 %
+put bbcL on acL to bcL at 150 %
+put aacR on bcR to acR at 150 %
+put aacL on bcL to acL at 150 %
+
+put LaacL on aacR to aacL at 175 %
+put RaacR on aacL to aacR at 175 %
+put LbbcL on bbcR to bbcL at 175 %
+put RbbcR on bbcL to bbcR at 175 %
+
+put c group 24 on x around z
+
+//
+
+
+draw aL to acL
+draw acL to aacL
+draw aacL to LaacL
+
+draw bL to bcL
+draw bcL to bbcL
+draw bbcL to LbbcL
+
+draw aR to acR
+draw acR to aacR
+draw aacR to RaacR
+
+draw bR to bcR
+draw bcR to bbcR
+draw bbcR to RbbcR
+
+draw L to R
+
+// draw x around z
+
+draw aR thru c2 c3 c4 c5 c6 c7 c8 c9 c10 aL
+draw bL thru c14 c15 c16 c17 c18 c19 c20 c21 c22 bR
+
+// draw x around z
+
+draw z to c10
+draw aR thru c2 c2 c4 c5 c6 c7 c8 c9 c10 aL

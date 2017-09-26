@@ -1,0 +1,19 @@
+let angles increase in a clockwise direction 
+by adding an option to change it...
+maybe the commmand could be:
+/!>>> set drawing theta+ cw
+for angles to increase clockwise, and
+/!>>> set drawing theta+ ccw
+for angles to increase counter-clockwise...
+... complementary syntax would also be permitted, such as:
+/!>>> set drawing theta- cw
+(which is the current behaviour, and mathematical norm)
+also allow acw == ccw
+
+
+
+add */ to list of kw for single line comment 
+so that it will not return as /= */ when the preceding  /* is removed
+
+
+
