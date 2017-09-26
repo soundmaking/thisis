@@ -50,6 +50,7 @@ to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
 to_comment_line.extend(to_end_block_comment)
 
+
 def degtorad(deg):
     return pi*(deg/180)
 
@@ -374,8 +375,6 @@ class Thisis:
                 return ret_msg
             # end if draw_type == 'to'
 
-            #
-
             if 'thru' == draw_type:
                 # // draw p1 thru p2 p3 ... pn
                 ret_msg = ['/_', 'poly', p1.x, p1.y, p2.x, p2.y]
@@ -394,8 +393,7 @@ class Thisis:
                     ret_msg.append(self.has_been_put[pn_name].y)
                     
                 return ret_msg
-                
-
+            # end if 'thru' == draw_type
         # end if kw == 'draw'
         else:
             # function shouldn't reach this if keyword_list is correct
