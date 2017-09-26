@@ -1,6 +1,6 @@
 import thisis_gamma
-from euclid3 import *
-from math import *
+from euclid3 import Point2  # , Vector2
+from math import pi
 
 thisis = thisis_gamma.Thisis()
 
