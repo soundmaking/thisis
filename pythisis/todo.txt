@@ -12,8 +12,6 @@ also allow acw == ccw
 
 
 
-add */ to list of kw for single line comment 
-so that it will not return as /= */ when the preceding  /* is removed
 
 
 

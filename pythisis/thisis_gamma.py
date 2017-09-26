@@ -48,7 +48,7 @@ return_types_dict = {
 to_comment_line = ['//', '/!'] + list(return_types_dict.keys())
 to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
-
+to_comment_line.extend(to_end_block_comment)
 
 def degtorad(deg):
     return pi*(deg/180)
