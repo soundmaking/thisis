@@ -2,7 +2,15 @@
 from euclid3 import Point2, Vector2
 from math import sqrt, pi, cos, sin, atan2, degrees
 
-# the 'to do' lists below are based on documentation of syntax in thisis_beta
+
+# # #
+# # # # # # Syntax Stuff # # # # # #
+# # #
+# the key word 'to do' lists below
+# are based on documentation of
+# syntax in version _beta with
+# planned changes for new
+# syntax in _gamma
 
 keyword_list = ['clear', 'put', 'unput', 'draw']
 # todo , 'delay', 'set', 'get', 'macro', '{', '}', '{}', 'spawn',
@@ -51,6 +59,11 @@ to_end_block_comment = ['*/', '../']
 to_comment_line.extend(to_end_block_comment)
 
 
+# # #
+# # # # # # Utility Functions # # # # # #
+# # #
+
+
 def degtorad(deg):
     return pi*(deg/180)
 
@@ -84,38 +97,44 @@ def howfar(p1=Point2(), p2=Point2()):
     return h
 
 
+# # #
+# # # # # # Object Classes # # # # # #
+# # #
+
+
 class TextBuffer:
     def __init__(self):
-        self.buffer = []
+        self.text_lines_list = []
+        # self.prev_line = -1
 
     def string_to_buffer(self, text_in, mode='set'):
         if mode == 'set':
-            self.buffer = []
-        # if mode not 'set' then text_in appends to existing buffer
+            self.text_lines_list = []
+        # if mode not 'set' then text_in appends to existing lines
         for l in text_in.splitlines():
-            self.buffer.append(l.split())
+            self.text_lines_list.append(l.split())
 
     def line(self, num):
-        # todo error catching on num
-        return self.buffer[num]
+        # todo error catching on num + add option to call 'next' line
+        return self.text_lines_list[num]
 
     def cut_comments(self):
-        # print('before cut comments:', self.buffer)
+        # print('before cut comments:', self.text_lines_list)
         block_comment_active = False
-        ret_buf = []
-        for l in self.buffer:
+        sans_comment_lines = []
+        for l in self.text_lines_list:
             if len(l) > 0:
                 if not block_comment_active:
                     if l[0] in to_start_block_comment:
                         block_comment_active = True
                     elif l[0] not in to_comment_line:
-                        ret_buf.append(l)
+                        sans_comment_lines.append(l)
                 else:
                     # is in comment block, so look for end of block
                     if l[0] in to_end_block_comment:
                         block_comment_active = False
-        self.buffer = ret_buf
-        # print('after cut comments:', self.buffer)
+        self.text_lines_list = sans_comment_lines
+        # print('after cut comments:', self.text_lines_list)
 
 
 class Thisis:
@@ -124,16 +143,16 @@ class Thisis:
     text_buffer = TextBuffer()
 
     def self_buffer_parse(self):
-        return self.buffer_parse(self.text_buffer.buffer)
+        return self.multi_line_parse(self.text_buffer.text_lines_list)
 
-    def buffer_parse(self, input_buffer):
-        return_buffer = []
-        p = TextBuffer()
-        p.buffer = input_buffer
-        p.cut_comments()
-        for l in p.buffer:
-            return_buffer.append(self.parse_line(l))
-        return return_buffer
+    def multi_line_parse(self, input_text_lines_list):
+        ret_msg_list = []
+        buffer = TextBuffer()
+        buffer.text_lines_list = input_text_lines_list
+        buffer.cut_comments()
+        for l in buffer.text_lines_list:
+            ret_msg_list.append(self.parse_line(l))
+        return ret_msg_list
 
     def parse_line(self, txt_in):
         # txt_in is expected to be a list of strings
@@ -402,16 +421,25 @@ class Thisis:
     # end def parse_line(self, line)
 
 
-if __name__ == '__main__':
-    print('/! \n/! thisis \n/! _gamma')
+# # #
+# # # # # # Command Line Interface style main function # # # # # #
+# # #
+
+def thisis_cli():
+    print('/! \n/! thisis_gamma\n/!  ')
+    print('/! interface to parser -')
+    print('/!     please enter a thisis command line or "exit"')
     thisis = Thisis()
     done = False
     while not done:
         text = input('/!\n/! >>> ')
         if text == 'exit':
-            done = True
+            # done = True
             break
         thisis.text_buffer.string_to_buffer(text)
         ret_buffer = thisis.self_buffer_parse()
         for li in ret_buffer:
             print(li)
+
+if __name__ == '__main__':
+    thisis_cli()
