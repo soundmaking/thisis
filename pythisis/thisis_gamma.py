@@ -6,44 +6,77 @@ from math import sqrt, pi, cos, sin, atan2, degrees
 # # #
 # # # # # # Syntax Stuff # # # # # #
 # # #
-# the key word 'to do' lists below
-# are based on documentation of
-# syntax in version _beta with
-# planned changes for new
-# syntax in _gamma
 
-keyword_list = ['clear', 'put', 'unput', 'draw']
-# todo , 'delay', 'set', 'get', 'macro', '{', '}', '{}', 'spawn',
+syntax_key = {
+    'clear': (
+        'all',
+        'put',
+        'macros',
+        'rgba'),
+    'clearall': None,
+    'put': {
+        'at': None,
+        'on': ('to', 'around'),
+        'where': (),
+        'group': None},
+    'unput': None,
+    'draw': {
+        'line': {
+            'to': None,
+            'around': None,
+            'thru': None,
+            'arc': None,  # todo
+            'spiral': (  # todo
+                'log',
+                'Archimedes',
+                'A')},
+        'dot': (
+            '.',
+            '.o',
+            '.x',
+            '.[]'),
+        'group': ()},  # todo
+    'set': {  # todo
+        'legacy': (
+            'colour',
+            'sleep',
+            '_'),
+        'dotsize': '(todo)',
+        'pensize': '(todo)',
+        'penloc': {
+            '(todo)': '(todo)',
+            'move': (
+                '(todo)',
+                'relpx',
+                'rel',
+                'relative'),
+            'to': '(todo)'},
+        'rgba': '(todo)',
+        'delaytime': '(todo)',
+        'sleeptime': '(todo)'},
+    'get': (  # todo
+        'rgba',
+        'howfar',
+        'whereis',
+        'howmany'),
+    'macro': {  # todo
+        'braces': {
+            '{': 'start',
+            '}': 'end',
+            '{}': 'run'},
+        'start': '(todo)',
+        'end': '(todo)',
+        'run': '(todo)'},
+    'delay': None,  # todo
+    'spawn': '(todo)'
+}  # end of syntax_key dict
 
-types_of_put = ['at', 'on', 'where', 'group']
-types_of_put_on = ['to', 'around']
-
-types_of_draw_dot = ['.', '.o', '.x', '.[]']
-types_of_draw_line = ['to', 'around', 'thru']  # todo , 'spiral'
-types_of_draw = types_of_draw_dot + types_of_draw_line
-
-# types_of_clear = []  # todo 'all', 'put', 'macros', 'namedrgba',
-# types_of_set = []
-# todo 'delaytime', 'namedrgba', 'dot', 'pen', 'penloc', 'sleep', '_'
-# types_of_pen_set = []  # todo 'size', 'rgba', 'namedrgba'
-# types_of_penloc_set = []  # todo 'to', 'move'
-# types_of_get = []  # todo 'rgba', 'howfar', 'whereis', 'howmany'
-# types_of_spiral = []  # todo 'log', 'Archimedes', 'A'
-# types_of_macro = []  # todo 'start', 'end', 'run'
-
-# deprecated syntax:
-#    keywords that were in _beta, but are dropped:...
-#         lcd, thisis, (relpx,rel,relative),
-#    ...or changed in _gamma:
-#        clearall, colour, dotsize, pensize, (sleep,_),
-
-# idea - maybe collapse all the types_of_... lists into a one nested
-#         structure which could then be parsed out to document the syntax
 
 return_types_dict = {
     # parse_line() returns list such as ['/!', 'a', 'return', 'message']
     # beginning with one of these token types:
     '/?': 'error',
+    '/!': 'info',
     '/>': 'successful put',
     '/<': 'successful unput',
     '/_': 'drawing data',
@@ -139,6 +172,9 @@ class TextBuffer:
 
 class Thisis:
     has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
+    put_groups = {}
+    named_rgba = {}
+    macros = {}
 
     text_buffer = TextBuffer()
 
@@ -159,11 +195,38 @@ class Thisis:
         kw = txt_in[0]
         # print('kw = ', kw)
 
-        if kw not in keyword_list:
+        if kw not in syntax_key:
             return ['/=', ' '.join(txt_in)]
 
-        if 'clear' == kw:
-            return ['/_', 'clear']
+        if kw in ('clear', 'clearall'):
+            ret_msg = ['/!']
+            try:
+                clear_type = txt_in[1]
+            except IndexError:
+                clear_type = 'all'
+                ret_msg.append('clear all')
+
+            if clear_type not in syntax_key['clear']:
+                return ['/?', 'unknown clear_type: {}'.format(clear_type)]
+
+            if clear_type in ('put', 'all'):
+                ret_msg.append(
+                    '/< unput {} points'.format(len(self.has_been_put)))
+                self.has_been_put = {}
+                self.put_groups = {}
+
+            if clear_type in ('rgba', 'all'):
+                ret_msg.append(
+                    '- cleared {} named rgba'.format(len(self.named_rgba)))
+                self.named_rgba = {}
+
+            if clear_type in ('macros', 'all'):
+                ret_msg.append(
+                    '- cleared {} macros'.format(len(self.macros)))
+                self.macros = {}
+
+            return ret_msg
+        # end kw 'clear' or 'clearall'
 
         if 'put' == kw:
             # put is the fundamental thisis command with syntax structure:
@@ -178,7 +241,7 @@ class Thisis:
             p_name = txt_in[1]
             put_type = txt_in[2]
 
-            if put_type not in types_of_put:
+            if put_type not in syntax_key['put']:
                 return ['/?', 'cannot put with "{}"'.format(put_type)]
 
             if 'at' == put_type:
@@ -207,7 +270,7 @@ class Thisis:
                     return ['/?', ' '.join(txt_in)]
 
                 on_type = txt_in[4]
-                if on_type not in types_of_put_on:
+                if on_type not in syntax_key['put']['on']:
                     return ['/?', 'on', on_type, 'unknown']
                 p3 = self.has_been_put[txt_in[3]]
                 p5 = self.has_been_put[txt_in[5]]
@@ -274,8 +337,8 @@ class Thisis:
 
                 on_type = txt_in[6]
 
-                if on_type not in types_of_put_on:
-                    return ['/?', 'on type', on_type, 'unknown']
+                if on_type not in syntax_key['put']['on']:
+                    return ['/?', 'unknown on_type: "{}"'.format(on_type)]
 
                 group_size = int(txt_in[3])
                 p5 = txt_in[5]
@@ -303,17 +366,14 @@ class Thisis:
                             ['/?', 'wrong on_type:', '/='].append(txt_in)
                         )
                     put_ret = self.parse_line(put)
-                    # print('put_ret', put_ret)
-                    put_ret_list.append(put_ret)
+                    put_ret_list.append(put_ret[1:])
                 # end for n in range(group_size)
 
-                for msg in put_ret_list:
-                    ret_msg.append(msg[1])
-                    ret_msg.append(msg[2])
-                    ret_msg.append(msg[3])
-
+                ret_msg.extend(msg for msg in put_ret_list)
+                self.put_groups[p_name] = group_size
                 return ret_msg
             # end if put_type == 'group'
+            return ['/?', txt_in]
         # end if kw == 'put'
 
         if 'unput' == kw:
@@ -349,7 +409,9 @@ class Thisis:
             except IndexError:
                 return ['/?', 'draw {} how?'.format(p1_name)]
 
-            if draw_type not in types_of_draw:
+            type_ok = draw_type in syntax_key['draw']['line']
+            type_ok = type_ok or draw_type in syntax_key['draw']['dot']
+            if not type_ok:
                 return ['/?', 'unknown draw_type: {}'.format(draw_type)]
 
             # having made it to this far in the function,
@@ -402,9 +464,8 @@ class Thisis:
                 if num_extra_points < 1:
                     return ret_msg
 
-                for n in range(num_extra_points):
-                    pn_name = txt_in[n+4]
-                    
+                for pn_name in txt_in[4:]:
+
                     if pn_name not in self.has_been_put:
                         return ['/?', '{} has not been put'.format(pn_name)]
                     
@@ -413,11 +474,12 @@ class Thisis:
                     
                 return ret_msg
             # end if 'thru' == draw_type
+            return ['/?', txt_in]
         # end if kw == 'draw'
         else:
-            # function shouldn't reach this if keyword_list is correct
-            print('? check keyword_list')
-            return ['/?', '!']
+            # function shouldn't reach this if syntax_key is correct
+            print('? check syntax_key')
+            return ['/?', 'syntax_key error']
     # end def parse_line(self, line)
 
 
