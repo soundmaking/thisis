@@ -33,7 +33,8 @@ syntax_key = {
             '.',
             '.o',
             '.x',
-            '.[]')},
+            '.[]'),
+        'group': ()},  # todo
     'set': {  # todo
         'legacy': (
             'colour',
@@ -170,9 +171,9 @@ class TextBuffer:
 
 class Thisis:
     has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
+    put_groups = {}
     named_rgba = {}
     macros = {}
-
 
     text_buffer = TextBuffer()
 
@@ -211,6 +212,7 @@ class Thisis:
                 ret_msg.append(
                     '/< unput {} points'.format(len(self.has_been_put)))
                 self.has_been_put = {}
+                self.put_groups = {}
 
             if clear_type in ('rgba', 'all'):
                 ret_msg.append(
@@ -334,7 +336,7 @@ class Thisis:
                 on_type = txt_in[6]
 
                 if on_type not in syntax_key['put']['on']:
-                    return ['/?', 'on type', on_type, 'unknown']
+                    return ['/?', 'unknown on_type: "{}"'.format(on_type)]
 
                 group_size = int(txt_in[3])
                 p5 = txt_in[5]
@@ -362,15 +364,11 @@ class Thisis:
                             ['/?', 'wrong on_type:', '/='].append(txt_in)
                         )
                     put_ret = self.parse_line(put)
-                    # print('put_ret', put_ret)
-                    put_ret_list.append(put_ret)
+                    put_ret_list.append(put_ret[1:])
                 # end for n in range(group_size)
 
-                for msg in put_ret_list:
-                    ret_msg.append(msg[1])
-                    ret_msg.append(msg[2])
-                    ret_msg.append(msg[3])
-
+                ret_msg.extend(msg for msg in put_ret_list)
+                self.put_groups[p_name] = group_size
                 return ret_msg
             # end if put_type == 'group'
         # end if kw == 'put'
@@ -463,9 +461,8 @@ class Thisis:
                 if num_extra_points < 1:
                     return ret_msg
 
-                for n in range(num_extra_points):
-                    pn_name = txt_in[n+4]
-                    
+                for pn_name in txt_in[4:]:
+
                     if pn_name not in self.has_been_put:
                         return ['/?', '{} has not been put'.format(pn_name)]
                     
@@ -478,7 +475,7 @@ class Thisis:
         else:
             # function shouldn't reach this if syntax_key is correct
             print('? check syntax_key')
-            return ['/?', '!']
+            return ['/?', 'syntax_key error']
     # end def parse_line(self, line)
 
 
