@@ -25,6 +25,7 @@ syntax_key = {
             'to': None,
             'around': None,
             'thru': None,
+            'arc': None,  # todo
             'spiral': (  # todo
                 'log',
                 'Archimedes',
@@ -225,6 +226,7 @@ class Thisis:
                 self.macros = {}
 
             return ret_msg
+        # end kw 'clear' or 'clearall'
 
         if 'put' == kw:
             # put is the fundamental thisis command with syntax structure:
@@ -371,6 +373,7 @@ class Thisis:
                 self.put_groups[p_name] = group_size
                 return ret_msg
             # end if put_type == 'group'
+            return ['/?', txt_in]
         # end if kw == 'put'
 
         if 'unput' == kw:
@@ -471,6 +474,7 @@ class Thisis:
                     
                 return ret_msg
             # end if 'thru' == draw_type
+            return ['/?', txt_in]
         # end if kw == 'draw'
         else:
             # function shouldn't reach this if syntax_key is correct
