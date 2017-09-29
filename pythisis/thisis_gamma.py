@@ -9,11 +9,11 @@ from math import sqrt, pi, cos, sin, atan2, degrees
 
 syntax_key = {
     'clear': (
-        '(todo)',
         'all',
         'put',
         'macros',
-        'namedrgba'),
+        'rgba'),
+    'clearall': None,
     'put': {
         'at': None,
         'on': ('to', 'around'),
@@ -25,8 +25,7 @@ syntax_key = {
             'to': None,
             'around': None,
             'thru': None,
-            'spiral': (
-                '(todo)',
+            'spiral': (  # todo
                 'log',
                 'Archimedes',
                 'A')},
@@ -35,16 +34,11 @@ syntax_key = {
             '.o',
             '.x',
             '.[]')},
-    'set': {
-        '(todo)': '(todo)',
+    'set': {  # todo
         'legacy': (
-            '(todo)',
             'colour',
             'sleep',
             '_'),
-        'delaytime': '(todo)',
-        'sleeptime': '(todo)',
-        'rgba': '(todo)',
         'dotsize': '(todo)',
         'pensize': '(todo)',
         'penloc': {
@@ -53,16 +47,17 @@ syntax_key = {
                 '(todo)',
                 'relpx',
                 'rel',
-                'relative')},
+                'relative'),
             'to': '(todo)'},
-    'get': (
-        '(todo)',
+        'rgba': '(todo)',
+        'delaytime': '(todo)',
+        'sleeptime': '(todo)'},
+    'get': (  # todo
         'rgba',
         'howfar',
         'whereis',
         'howmany'),
-    'macro': {
-        '(todo)': '(todo)',
+    'macro': {  # todo
         'braces': {
             '{': 'start',
             '}': 'end',
@@ -70,9 +65,8 @@ syntax_key = {
         'start': '(todo)',
         'end': '(todo)',
         'run': '(todo)'},
-    'delay': '(todo)',
-    'spawn': '(todo)',
-    'clearall': '(todo)(legacy)'
+    'delay': None,  # todo
+    'spawn': '(todo)'
 }  # end of syntax_key dict
 
 
@@ -80,6 +74,7 @@ return_types_dict = {
     # parse_line() returns list such as ['/!', 'a', 'return', 'message']
     # beginning with one of these token types:
     '/?': 'error',
+    '/!': 'info',
     '/>': 'successful put',
     '/<': 'successful unput',
     '/_': 'drawing data',
@@ -175,6 +170,9 @@ class TextBuffer:
 
 class Thisis:
     has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
+    named_rgba = {}
+    macros = {}
+
 
     text_buffer = TextBuffer()
 
@@ -198,8 +196,33 @@ class Thisis:
         if kw not in syntax_key:
             return ['/=', ' '.join(txt_in)]
 
-        if 'clear' == kw:
-            return ['/_', 'clear']
+        if kw in ('clear', 'clearall'):
+            ret_msg = ['/!']
+            try:
+                clear_type = txt_in[1]
+            except IndexError:
+                clear_type = 'all'
+                ret_msg.append('clear all')
+
+            if clear_type not in syntax_key['clear']:
+                return ['/?', 'unknown clear_type: {}'.format(clear_type)]
+
+            if clear_type in ('put', 'all'):
+                ret_msg.append(
+                    '/< unput {} points'.format(len(self.has_been_put)))
+                self.has_been_put = {}
+
+            if clear_type in ('rgba', 'all'):
+                ret_msg.append(
+                    '- cleared {} named rgba'.format(len(self.named_rgba)))
+                self.named_rgba = {}
+
+            if clear_type in ('macros', 'all'):
+                ret_msg.append(
+                    '- cleared {} macros'.format(len(self.macros)))
+                self.macros = {}
+
+            return ret_msg
 
         if 'put' == kw:
             # put is the fundamental thisis command with syntax structure:
