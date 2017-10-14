@@ -37,6 +37,15 @@ syntax_key = {
             '.[]'),
         'group': ()},  # todo
     'set': {  # todo
+        'world': {
+            'ltrb': '(todo)',
+            'pixels': '(todo)',
+            'theta': (  # todo
+                '+cw',
+                '-cw')},
+        'sizes': (  # todo
+            'world',
+            'pixels'),
         'legacy': (
             'colour',
             'sleep',
