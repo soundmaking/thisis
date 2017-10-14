@@ -100,6 +100,14 @@ to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
 to_comment_line.extend(to_end_block_comment)
 
+default_settings = {
+    'world': {
+        'ltrb': (-1, -1, 1, 1),
+        'pixels': (400, 400),
+        'theta': '+cw'}
+    'sizes': 'pixels'
+}
+
 
 # # #
 # # # # # # Utility Functions # # # # # #
