@@ -100,7 +100,9 @@ to_start_block_comment = ['/*', '/..']
 to_end_block_comment = ['*/', '../']
 to_comment_line.extend(to_end_block_comment)
 
+
 default_settings = {
+    'rgba': {},
     'world': {
         'ltrb': (-1, -1, 1, 1),
         'pixels': (0, 0, 400, 400),
@@ -187,13 +189,15 @@ class TextBuffer:
         # print('after cut comments:', self.text_lines_list)
 
 
-class Thisis:
+class Thisis: 
+    settings = defualt_settings
     has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
     put_groups = {}
-    named_rgba = {}
+    # named_rgba = {}  # moved this to the new settings dict
     macros = {}
 
     text_buffer = TextBuffer()
+    
 
     def self_buffer_parse(self):
         return self.multi_line_parse(self.text_buffer.text_lines_list)
