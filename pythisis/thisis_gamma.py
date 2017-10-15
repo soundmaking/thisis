@@ -190,13 +190,27 @@ class TextBuffer:
 
 
 class Thisis: 
-    settings = defualt_settings
-    has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
-    put_groups = {}
-    # named_rgba = {}  # moved this to the new settings dict
-    macros = {}
+    def __init__(self):  # fixme: untested
+        self.settings = defualt_settings
+        # add derived settings for mapping 
+        self.settings['world']['width'] = 
+            self.settings['world']['L'
+        self.has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
+        self.put_groups = {}
+        self.macros = {}
 
-    text_buffer = TextBuffer()
+        self.text_buffer = TextBuffer()
+  
+                               
+    def update_world_and_pixels_mapping():
+        self.
+
+        
+    def w_to_pixels(p=Point2(0, 0)):
+        # fixme: untested
+        scale_x = (self.settings - range2.min) / (range1.max - range1.min)
+        new_value = (value - range1.min) * scale + range2.min
+        
     
 
     def self_buffer_parse(self):
