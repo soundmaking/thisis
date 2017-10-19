@@ -105,9 +105,13 @@ default_settings = {
     'rgba': {},
     'world': {
         'ltrb': (-1, -1, 1, 1),
-        'pixels': (0, 0, 400, 400),
-        'theta': '+cw'}
-    'sizes': 'pixels'
+        'theta': '+cw'},
+    'screen': {
+        'ltrb': (0, 0, 400, 400)},
+    'sizes': {
+        'use': 'screen',
+        'pen': 1,
+        'dot': 12}
 }
 
 
@@ -189,29 +193,69 @@ class TextBuffer:
         # print('after cut comments:', self.text_lines_list)
 
 
-class Thisis: 
+class Thisis:
+    """
+    The Thisis object
+        maintains data pertaining to its world
+        has functions to parse and return text messages
+    """
     def __init__(self):  # fixme: untested
-        self.settings = defualt_settings
-        # add derived settings for mapping 
-        self.settings['world']['width'] = 
-            self.settings['world']['L'
-        self.has_been_put = {'x': Point2(0.50, 0.50), 'z': Point2(0.00, 0.00)}
+        """ initialise data/settings """
+        self.has_been_put = {'x': Point2(0.5, 0.5), 'z': Point2(0.0, 0.0)}
         self.put_groups = {}
         self.macros = {}
 
-        self.text_buffer = TextBuffer()
-  
-                               
-    def update_world_and_pixels_mapping():
-        self.
+        self.setis = default_settings
+        self.w_to_s('update setis')
 
-        
-    def w_to_pixels(p=Point2(0, 0)):
-        # fixme: untested
-        scale_x = (self.settings - range2.min) / (range1.max - range1.min)
-        new_value = (value - range1.min) * scale + range2.min
-        
-    
+        self.text_buffer = TextBuffer()
+
+    def w_to_s(self, arg):
+        """ To convert from world to screen.
+        :param arg: str 'update setis' OR str name_of_put_point OR Point2
+        :returns : Point2 OR None
+        """
+
+        if isinstance(arg, str):
+            if arg == 'update setis':
+                l, t, r, b = self.setis['world']['ltrb']
+                x_range_w = r - l
+                y_range_w = b - t
+                # fixme: check assumptions on minimum values...
+                self.setis['world']['x min'] = l
+                self.setis['world']['y min'] = t
+                self.setis['world']['x range'] = x_range_w
+                self.setis['world']['y range'] = y_range_w
+
+                l, t, r, b = self.setis['screen']['ltrb']
+                x_range_s = r - l
+                y_range_s = b - t
+                self.setis['screen']['x min'] = l
+                self.setis['screen']['y min'] = t
+                self.setis['screen']['x range'] = x_range_s
+                self.setis['screen']['y range'] = y_range_s
+
+                self.setis['scale x'] = x_range_s / x_range_w
+                self.setis['scale y'] = y_range_s / y_range_w
+                return None
+            elif arg in self.has_been_put:
+                return self.w_to_s(self.has_been_put[arg])
+            else:
+                print('/? unknown string for w_to_s(): ', arg)
+                return None
+
+        if isinstance(arg, Point2):
+            x = arg.x - self.setis['world']['x min']
+            x *= self.setis['scale x']
+            x += self.setis['screen']['x min']
+
+            y = arg.y - self.setis['world']['y min']
+            y *= self.setis['scale y']
+            y += self.setis['screen']['y min']
+
+            return Point2(x, y)
+    # end def w_to_s(self, arg)
+
 
     def self_buffer_parse(self):
         return self.multi_line_parse(self.text_buffer.text_lines_list)
@@ -252,8 +296,8 @@ class Thisis:
 
             if clear_type in ('rgba', 'all'):
                 ret_msg.append(
-                    '- cleared {} named rgba'.format(len(self.named_rgba)))
-                self.named_rgba = {}
+                    '- cleared {} named rgba'.format(len(self.setis['rgba'])))
+                self.setis['rgba'] = {}
 
             if clear_type in ('macros', 'all'):
                 ret_msg.append(
@@ -538,5 +582,8 @@ def thisis_cli():
         for li in ret_buffer:
             print(li)
 
+
 if __name__ == '__main__':
-    thisis_cli()
+    thisis = Thisis()
+    print(thisis.w_to_s(Point2(-1, -0.5)))
+    # thisis_cli()
