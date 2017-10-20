@@ -12,7 +12,8 @@ syntax_key = {
         'all',
         'put',
         'macros',
-        'rgba'),
+        'rgba',
+        'setis'),
     'clearall': None,
     'put': {
         'at': None,
@@ -45,7 +46,7 @@ syntax_key = {
                 '-cw')},
         'sizes': (  # todo
             'world',
-            'pixels'),
+            'screen'),
         'legacy': (
             'colour',
             'sleep',
@@ -105,7 +106,7 @@ default_settings = {
     'rgba': {},
     'world': {
         'ltrb': (-1, -1, 1, 1),
-        'theta': '+cw'},
+        'theta': '+cw'},  # todo
     'screen': {
         'ltrb': (0, 0, 400, 400)},
     'sizes': {
@@ -120,25 +121,31 @@ default_settings = {
 # # #
 
 
-def degtorad(deg):
+def degtorad(deg):  # only used once - why not use degrees() ?
     return pi*(deg/180)
 
 
 def poltocar(r, theta, *args):
-    # polar to cartesian:
-    #   input  = radius and radians (or degrees if specified in call)
-    #   output = x y vector
+    """ Convert from polar to cartesian
+    :param r: radius
+    :param theta: in radians (or in degrees if specified in call)
+    :param args: use str 'deg' to change unit of theta
+    :return: x y vector
+    """
     if 'deg' in args:
-        theta = degtorad(theta)
+        theta = degtorad(theta)  # fixme: why not use degrees() ?
     x = cos(theta) * r
     y = sin(theta) * r
     return Vector2(x, y)
 
 
 def cartopol(x, y, *args):
-    # cartesian to polar:
-    #   input  = x and y
-    #   output = r and theta in radians (or degrees if specified in call)
+    """ Convert from cartesian to polar
+    :param x: position on x-axis
+    :param y: position on y-axis
+    :param args: use str 'deg' to request output using degrees
+    :return: [r, theta] theta in radians (or degrees if specified in call)
+    """
     r = howfar(Point2(x, y))
     theta = atan2(y, x)
     if 'deg' in args:
@@ -159,22 +166,36 @@ def howfar(p1=Point2(), p2=Point2()):
 
 
 class TextBuffer:
+    """ Object to hold and process lines of text as lists of strings """
     def __init__(self):
+        """ initialise data """
         self.text_lines_list = []
         # self.prev_line = -1
 
     def string_to_buffer(self, text_in, mode='set'):
+        """
+        Splits the string into a list of strings
+            and stores this as a line in the buffer
+        :param text_in: string
+        :param mode: use 'set' or 'append'
+        """
+        # todo: error catch isinstance(text_in, str)
         if mode == 'set':
             self.text_lines_list = []
-        # if mode not 'set' then text_in appends to existing lines
+        # if mode not 'set' then text_in appends to existing lines fixme: mode='append'
         for l in text_in.splitlines():
             self.text_lines_list.append(l.split())
 
     def line(self, num):
+        """ to access a line of text in the buffer
+        :param num:
+        :return:
+        """
         # todo error catching on num + add option to call 'next' line
         return self.text_lines_list[num]
 
     def cut_comments(self):
+        """ To remove and lines that are commented (using thisis syntax) """
         # print('before cut comments:', self.text_lines_list)
         block_comment_active = False
         sans_comment_lines = []
@@ -196,10 +217,10 @@ class TextBuffer:
 class Thisis:
     """
     The Thisis object
-        maintains data pertaining to its world
+        maintains data pertaining to its world, and
         has functions to parse and return text messages
     """
-    def __init__(self):  # fixme: untested
+    def __init__(self):
         """ initialise data/settings """
         self.has_been_put = {'x': Point2(0.5, 0.5), 'z': Point2(0.0, 0.0)}
         self.put_groups = {}
@@ -258,19 +279,30 @@ class Thisis:
 
 
     def self_buffer_parse(self):
+        """ Call multi_line_parse() with lines from object's TextBuffer """
         return self.multi_line_parse(self.text_buffer.text_lines_list)
 
     def multi_line_parse(self, input_text_lines_list):
+        """ parse a list of lists of strings...
+        :param input_text_lines_list: list where each item is a list of strings
+        :return: list of of return messages
+        """
         ret_msg_list = []
         buffer = TextBuffer()
         buffer.text_lines_list = input_text_lines_list
         buffer.cut_comments()
+
         for l in buffer.text_lines_list:
             ret_msg_list.append(self.parse_line(l))
+
         return ret_msg_list
 
     def parse_line(self, txt_in):
-        # txt_in is expected to be a list of strings
+        """ Function to process commands
+        :param txt_in: a list of strings comprising a message using thisis syntax
+        :returns : a return message as a list (mostly of strings)
+        """
+        # txt_in is expected to be
         kw = txt_in[0]
         # print('kw = ', kw)
 
@@ -282,7 +314,7 @@ class Thisis:
             try:
                 clear_type = txt_in[1]
             except IndexError:
-                clear_type = 'all'
+                clear_type = 'all'  # todo: fixme: 'clear all' == 'clearall' and 'clear' != 'clearall'
                 ret_msg.append('clear all')
 
             if clear_type not in syntax_key['clear']:
@@ -303,6 +335,11 @@ class Thisis:
                 ret_msg.append(
                     '- cleared {} macros'.format(len(self.macros)))
                 self.macros = {}
+
+            if clear_type in ('setis', 'all'):
+                ret_msg.append(
+                    '- setis = default_settings')
+                self.setis = default_settings
 
             return ret_msg
         # end kw 'clear' or 'clearall'
@@ -481,8 +518,7 @@ class Thisis:
                 # print('ret_msg:', ret_msg)
                 return ret_msg
             else:
-                p1 = self.has_been_put[p1_name]
-
+                p1 = self.w_to_s(p1_name)
             try:
                 draw_type = txt_in[2]
             except IndexError:
@@ -522,7 +558,7 @@ class Thisis:
                 return ['/?', '{} has not been put'.format(txt_in[3])]
 
             p2_name = txt_in[3]
-            p2 = self.has_been_put[p2_name]
+            p2 = self.w_to_s(p2_name)
 
             if 'to' == draw_type:
                 ret_msg = ['/_', 'linesegment', p1.x, p1.y, p2.x, p2.y]
@@ -547,9 +583,10 @@ class Thisis:
 
                     if pn_name not in self.has_been_put:
                         return ['/?', '{} has not been put'.format(pn_name)]
-                    
-                    ret_msg.append(self.has_been_put[pn_name].x)
-                    ret_msg.append(self.has_been_put[pn_name].y)
+
+                    pn = self.w_to_s(pn_name)
+                    ret_msg.append(pn.x)
+                    ret_msg.append(pn.y)
                     
                 return ret_msg
             # end if 'thru' == draw_type
@@ -563,10 +600,14 @@ class Thisis:
 
 
 # # #
-# # # # # # Command Line Interface style main function # # # # # #
+# # # # # # ___main___ for dev # # # # # #
 # # #
 
 def thisis_cli():
+    """
+    Command Line Interface
+        to run as main function
+    """
     print('/! \n/! thisis_gamma\n/!  ')
     print('/! interface to parser -')
     print('/!     please enter a thisis command line or "exit"')
@@ -584,6 +625,4 @@ def thisis_cli():
 
 
 if __name__ == '__main__':
-    thisis = Thisis()
-    print(thisis.w_to_s(Point2(-1, -0.5)))
-    # thisis_cli()
+    thisis_cli()
