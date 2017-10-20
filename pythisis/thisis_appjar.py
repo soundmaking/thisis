@@ -16,7 +16,7 @@ thisis = thisis_gamma.Thisis()
 
 trtl = turtle.Pen()
 trtl.shape('square')
-trtl.shapesize(0.1, 0.1)
+# trtl.shapesize(1, 1)
 trtl.speed(10)
 
 
@@ -79,16 +79,16 @@ def text_bttn(_arg):
 # end def text_bttn(_arg)
 
 
-def update_settings():
-    pass
+def update_settings(arg):
+    trtl.shape(app.getLabel('turtle shape')
 
 
 app.addTextArea('textbox').config(font="Courier 20")
 
 app.addButton("txt", text_bttn)
 
-# app.addLabelOptionBox('turtle shape', turtle_shapes)
-# app.addButton('update', update_settings)
+app.addLabelOptionBox('turtle shape', turtle_shapes)
+app.addButton('update', update_settings)
 
 app.setTextArea('textbox', '''/!
 /*
